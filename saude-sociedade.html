@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAÚDE E SOCIEDADE III - Calculadora de Notas</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Calculadora de Notas</h1>
+            <h2>3° Período</h2>
+        </div>
+    </header>
+
+    <main class="container">
+        <br>
+        <a href="index.html" class="voltar">← Voltar para página inicial</a>
+        
+        <div class="calculadora">
+            <h2>SAÚDE E SOCIEDADE III</h2>
+            
+            <form id="calculadora-form">
+                
+               <div class="grade-input-section">
+                <div class="grade-input-group main-grade">
+                    <label for="p1">P1 (10 pontos):</label>
+                    <input type="number" id="p1" min="0" max="10" step="0.01" placeholder="Digite a nota da P1">
+                </div>
+            </div>
+
+            <div class="grade-input-section">
+                <div class="grade-input-group main-grade p2-toggle-header" data-target-details="p2ComponentsDetailsSaude">
+                    <label for="p2-completa">P2 (10 pontos):</label>
+                    <input type="number" id="p2-completa" min="0" max="10" step="0.01" placeholder="Digite a nota da P2">
+                    <span class="p2-components-label-action">CALCULAR POR COMPONENTES</span>
+                    <button type="button" class="expand-arrow-button">
+                        <span class="arrow-icon">▼</span>
+                    </button>
+                </div>
+                <div class="p2-components-details" id="p2ComponentsDetailsSaude" style="display: none;">
+                    <div class="form-group">
+                        <label for="p2-avaliacao">AVALIAÇÃO ESCRITA (4 pontos):</label>
+                        <input type="number" id="p2-avaliacao" min="0" max="4" step="0.01" placeholder="Digite a nota da avaliação escrita">
+                    </div>
+                    <div class="form-group">
+                        <label for="p2-estudo">ESTUDO DIRIGIDO RENATA (2 pontos):</label>
+                        <input type="number" id="p2-estudo" min="0" max="2" step="0.01" placeholder="Digite a nota do estudo dirigido">
+                    </div>
+                    <div class="form-group">
+                        <label for="p2-campo">AVALIAÇÃO CAMPO OU INFORMÁTICA (4 pontos):</label>
+                        <input type="number" id="p2-campo" min="0" max="4" step="0.01" placeholder="Digite a nota da avaliação de campo">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grade-input-section">
+                <div class="grade-input-group main-grade">
+                    <label for="p3">P3 - Atividade Integradora (10 pontos):</label>
+                    <input type="number" id="p3" min="0" max="10" step="0.01" placeholder="Digite a nota da P3">
+                </div>
+            </div>
+                
+                
+                <div class="buttons">
+                    <button type="button" id="calcular" class="btn-calcular">Calcular</button>
+                    <button type="button" id="limpar" class="btn-limpar">Limpar</button>
+                </div>
+            </form>
+            
+            <div id="resultado" class="resultado">
+                <h3>Resultado:</h3>
+                <div id="media-final" style="display: none;">
+                    <p>Sua média final é: <strong id="nota-final">0.00</strong></p>
+                    <p id="mensagem" style="color: red;"></p>
+                </div>
+                <div id="notas-necessarias"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Autoria de Gabriel Papa</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calcularBtn = document.getElementById('calcular');
+            const limparBtn = document.getElementById('limpar');
+            
+            calcularBtn.addEventListener('click', calcularNota);
+            limparBtn.addEventListener('click', limparCampos);
+        });
+        
+        function calcularNota() {
+            // Obter valores dos campos
+            const p1Input = document.getElementById('p1').value;
+            const p2CompletaInput = document.getElementById('p2-completa').value;
+            const p2AvaliacaoInput = document.getElementById('p2-avaliacao').value;
+            const p2EstudoInput = document.getElementById('p2-estudo').value;
+            const p2CampoInput = document.getElementById('p2-campo').value;
+            const p3Input = document.getElementById('p3').value;
+            
+            // Converter para números
+            let p1 = p1Input ? parseFloat(p1Input) : null;
+            let p2 = null;
+            let p3 = p3Input ? parseFloat(p3Input) : null;
+            
+            // Verificar se P2 completa foi fornecida
+            if (p2CompletaInput) {
+                p2 = parseFloat(p2CompletaInput);
+            } 
+            // Ou se todos os componentes de P2 foram fornecidos
+            else if (p2AvaliacaoInput && p2EstudoInput && p2CampoInput) {
+                const p2Avaliacao = parseFloat(p2AvaliacaoInput);
+                const p2Estudo = parseFloat(p2EstudoInput);
+                const p2Campo = parseFloat(p2CampoInput);
+                p2 = p2Avaliacao + p2Estudo + p2Campo;
+            }
+            
+            // Elemento para mostrar notas necessárias
+            const notasNecessarias = document.getElementById('notas-necessarias');
+            notasNecessarias.innerHTML = '';
+            
+            // Elementos para mostrar média final
+            const mediaFinal = document.getElementById('media-final');
+            const notaFinal = document.getElementById('nota-final');
+            const mensagem = document.getElementById('mensagem');
+            
+            // Verificar quais notas principais estão faltando
+            const notasFaltando = [];
+            if (p1 === null) notasFaltando.push('P1');
+            if (p2 === null && !p2AvaliacaoInput && !p2EstudoInput && !p2CampoInput) notasFaltando.push('P2');
+            if (p3 === null) notasFaltando.push('P3');
+            
+            // Verificar componentes de P2
+            const p2ComponentesFaltando = [];
+            if (!p2CompletaInput) {
+                if (!p2AvaliacaoInput) p2ComponentesFaltando.push('Avaliação escrita');
+                if (!p2EstudoInput) p2ComponentesFaltando.push('Estudo dirigido');
+                if (!p2CampoInput) p2ComponentesFaltando.push('Avaliação Campo');
+            }
+            
+            // Se temos alguns componentes de P2 mas não todos
+            if (p2ComponentesFaltando.length > 0 && p2ComponentesFaltando.length < 3) {
+                // Calcular P2 parcial
+                let p2Parcial = 0;
+                
+                if (p2AvaliacaoInput) {
+                    p2Parcial += parseFloat(p2AvaliacaoInput);
+                }
+                
+                if (p2EstudoInput) {
+                    p2Parcial += parseFloat(p2EstudoInput);
+                }
+                
+                if (p2CampoInput) {
+                    p2Parcial += parseFloat(p2CampoInput);
+                }
+                
+                // Remover P2 da lista de notas faltando se estava lá
+                const p2Index = notasFaltando.indexOf('P2');
+                if (p2Index !== -1) {
+                    notasFaltando.splice(p2Index, 1);
+                }
+            }
+            
+            // Se todas as notas principais foram fornecidas e não há componentes de P2 faltando
+            if (notasFaltando.length === 0 && p2ComponentesFaltando.length === 0) {
+                // Se P2 não foi fornecida diretamente, calcular a partir dos componentes
+                if (p2 === null && p2AvaliacaoInput && p2EstudoInput && p2CampoInput) {
+                    const p2Avaliacao = parseFloat(p2AvaliacaoInput);
+                    const p2Estudo = parseFloat(p2EstudoInput);
+                    const p2Campo = parseFloat(p2CampoInput);
+                    p2 = p2Avaliacao + p2Estudo + p2Campo;
+                }
+                
+                // Média final = [(P1 x 5) + (P2 x 5) + (P3 x 1)] / 11
+                const mediaFinalValor = ((p1 * 5) + (p2 * 5) + (p3 * 1)) / 11;
+                
+                // Formatar a nota com 2 casas decimais
+                const notaFormatada = formatarNota(mediaFinalValor);
+                notaFinal.textContent = notaFormatada;
+                
+                // Definir a mensagem com base na nota
+                mensagem.textContent = obterMensagem(mediaFinalValor);
+                
+                // Adicionar classe com base na nota
+                mediaFinal.className = '';
+                if (mediaFinalValor >= 7) {
+                    mediaFinal.classList.add('aprovado');
+                } else if (mediaFinalValor >= 3 && mediaFinalValor < 7) {
+                    mediaFinal.classList.add('recuperacao');
+                    // Adicionar link para cálculo da prova final
+                    const linkProvaFinal = document.createElement('p');
+                    linkProvaFinal.innerHTML = '<a href="prova-final.html" class="btn-calcular" style="display: inline-block; margin-top: 10px; text-decoration: none; text-align: center;">Cálculo da Prova Final</a>';
+                    mediaFinal.appendChild(linkProvaFinal);
+                } else {
+                    mediaFinal.classList.add('reprovado');
+                }
+                
+                // Mostrar apenas a média final
+                mediaFinal.style.display = 'block';
+                notasNecessarias.style.display = 'none';
+                
+                // Mostrar o resultado
+                const resultado = document.getElementById('resultado');
+                resultado.style.display = 'block';
+                return;
+            }
+            
+            // Calcular o total de pontos já obtidos e o peso total
+            let pontosObtidos = 0;
+            let pesoTotal = 11; // Peso total da disciplina
+            let pesoFaltando = 0;
+            
+            if (p1 !== null) pontosObtidos += p1 * 5;
+            else pesoFaltando += 5;
+            
+            // Se P2 está completa, adicionar aos pontos obtidos
+            if (p2 !== null) {
+                pontosObtidos += p2 * 5;
+            } 
+            // Se temos componentes parciais de P2
+            else if (p2AvaliacaoInput || p2EstudoInput || p2CampoInput) {
+                // Calcular P2 parcial
+                let p2Parcial = 0;
+                
+                if (p2AvaliacaoInput) {
+                    p2Parcial += parseFloat(p2AvaliacaoInput);
+                }
+                
+                if (p2EstudoInput) {
+                    p2Parcial += parseFloat(p2EstudoInput);
+                }
+                
+                if (p2CampoInput) {
+                    p2Parcial += parseFloat(p2CampoInput);
+                }
+                
+                // Adicionar pontos parciais de P2
+                pontosObtidos += p2Parcial * 5;
+                
+                // Ajustar peso faltando com base nos componentes presentes
+                let pontosFaltantes = 10;
+                if (p2AvaliacaoInput) pontosFaltantes -= 4;
+                if (p2EstudoInput) pontosFaltantes -= 2;
+                if (p2CampoInput) pontosFaltantes -= 4;
+                
+                pesoFaltando += 5 * (pontosFaltantes / 10);
+            } else {
+                pesoFaltando += 5;
+            }
+            
+            if (p3 !== null) pontosObtidos += p3 * 1;
+            else pesoFaltando += 1;
+            
+            // Verificar se o aluno já passou com as notas atuais
+            if (verificarAprovacaoAutomatica(pontosObtidos, pesoTotal, pesoFaltando)) {
+                notasNecessarias.innerHTML = '<h4>Parabéns, você já passou!</h4>';
+                
+                // Mostrar apenas as notas necessárias
+                mediaFinal.style.display = 'none';
+                notasNecessarias.style.display = 'block';
+                
+                // Mostrar o resultado
+                const resultado = document.getElementById('resultado');
+                resultado.style.display = 'block';
+                return;
+            }
+            
+            // Se faltam notas, calcular quanto precisa tirar para média 7
+            let html = '<h4>Notas necessárias para média 7:</h4><ul>';
+            
+            // Calcular a nota necessária para as avaliações principais faltantes
+            if (notasFaltando.length > 0) {
+                const notaNecessaria = (7 * pesoTotal - pontosObtidos) / pesoFaltando;
+                
+                
+                // Adicionar a nota necessária para cada avaliação principal faltante
+                notasFaltando.forEach(nota => {
+                    html += `<li>${nota}: <strong>${formatarNota(notaNecessaria)}</strong></li>`;
+                });
+            }
+            
+          // Calcular quanto falta em cada componente de P2
+            if (p2ComponentesFaltando.length > 0) {
+                const PASSING_GRADE = 7;
+                const P1_WEIGHT = 5;
+                const P2_WEIGHT = 5;
+                const P3_WEIGHT = 1;
+                const TOTAL_SEMESTER_WEIGHT = 11;
+
+                const effectiveP1 = p1Input ? parseFloat(p1Input) : 0;
+                const effectiveP3 = p3Input ? parseFloat(p3Input) : 0;
+
+                let targetP2Grade = ((PASSING_GRADE * TOTAL_SEMESTER_WEIGHT) -
+                                   (effectiveP1 * P1_WEIGHT) -
+                                   (effectiveP3 * P3_WEIGHT)) / P2_WEIGHT;
+                targetP2Grade = Math.max(0, Math.min(10, targetP2Grade));
+
+                const currentP2Avaliacao = p2AvaliacaoInput ? parseFloat(p2AvaliacaoInput) : 0;
+                const currentP2Estudo = p2EstudoInput ? parseFloat(p2EstudoInput) : 0;
+                const currentP2Campo = p2CampoInput ? parseFloat(p2CampoInput) : 0;
+                const currentP2SumFromFilled = currentP2Avaliacao + currentP2Estudo + currentP2Campo;
+
+                let pointsStillNeededInP2Sum = targetP2Grade - currentP2SumFromFilled;
+                pointsStillNeededInP2Sum = Math.max(0, pointsStillNeededInP2Sum);
+
+                const max_p2_avaliacao = 4;
+                const max_p2_estudo = 2;
+                const max_p2_campo = 4;
+
+                let sumOfMaxScoresOfMissingComponents = 0;
+                if (p2ComponentesFaltando.includes('Avaliação escrita')) {
+                    sumOfMaxScoresOfMissingComponents += max_p2_avaliacao;
+                }
+                if (p2ComponentesFaltando.includes('Estudo dirigido')) {
+                    sumOfMaxScoresOfMissingComponents += max_p2_estudo;
+                }
+                if (p2ComponentesFaltando.includes('Avaliação Campo')) {
+                    sumOfMaxScoresOfMissingComponents += max_p2_campo;
+                }
+
+                if (sumOfMaxScoresOfMissingComponents > 0) {
+                    if (p2ComponentesFaltando.includes('Avaliação escrita')) {
+                        let needed = (max_p2_avaliacao / sumOfMaxScoresOfMissingComponents) * pointsStillNeededInP2Sum;
+                        needed = Math.max(0, Math.min(max_p2_avaliacao, needed));
+                        html += `<li>Avaliação escrita: <strong>${formatarNota(needed)}</strong> (de ${max_p2_avaliacao})</li>`;
+                    }
+                    if (p2ComponentesFaltando.includes('Estudo dirigido')) {
+                        let needed = (max_p2_estudo / sumOfMaxScoresOfMissingComponents) * pointsStillNeededInP2Sum;
+                        needed = Math.max(0, Math.min(max_p2_estudo, needed));
+                        html += `<li>Estudo dirigido: <strong>${formatarNota(needed)}</strong> (de ${max_p2_estudo})</li>`;
+                    }
+                    if (p2ComponentesFaltando.includes('Avaliação Campo')) {
+                        let needed = (max_p2_campo / sumOfMaxScoresOfMissingComponents) * pointsStillNeededInP2Sum;
+                        needed = Math.max(0, Math.min(max_p2_campo, needed));
+                        html += `<li>Avaliação Campo: <strong>${formatarNota(needed)}</strong> (de ${max_p2_campo})</li>`;
+                    }
+                }
+            }   
+            
+            html += '</ul>';
+            notasNecessarias.innerHTML = html;
+            
+            // Mostrar apenas as notas necessárias
+            mediaFinal.style.display = 'none';
+            notasNecessarias.style.display = 'block';
+            
+            // Mostrar o resultado
+            const resultado = document.getElementById('resultado');
+            resultado.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
